@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>21點 遊戲</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script> <!--  include jQuery from a CDN -->
+    <link rel="stylesheet" href="index.css" type="text/css">
+    <script src="./game.js"></script>
+</head>
+<body>
+    <div id="homePage"> <!-- 修改位置 -->
+        <!-- 主畫面遊戲Logo -->
+        <div id="blackjack-logo">
+            <img src="./img/blackjack-logo.png" alt="blackjack-logo">
+        </div>
+        <!-- 開始遊戲按鈕 -->
+        <div id="play_button">
+            <img src="./img/playBut.png" alt="play Button">
+        </div>
+    </div>
+    <!-- 頂部控制列 -->
+    <div id="controlBar"> <!-- 修改位置 -->
+        <div id="home">
+            <img src="./img/home.png" alt="back to homepage">
+        </div>
+        <div id="pause">
+            <img src="./img/pause.png" alt="pause game" id="pause_icon">
+        </div>
+    </div>
+
+    <div id="desk">
+        <!-- 桌子綠色區域(負責顯示主要遊戲畫面) -->
+        <div id="desk_green">
+            <!-- 顯示遊戲時莊家及玩家的點數 -->
+            <div id="dealerPoint" class="pointInfo"></div>
+            <div id="playerPoint" class="pointInfo"></div>
+            <div id="split1Point" class="pointInfo"></div>
+            <div id="split2Point" class="pointInfo"></div>
+            
+            <!-- 顯示卡片圖片 -->
+            <div id="cardArea">
+                <div id="dealerCards"></div>
+                <div id="playerCards"></div>
+                <div id="split1Cards"></div>
+                <div id="split2Cards"></div>
+            </div>
+
+            <!-- 下注時顯示所丟出的籌碼圖片 -->
+            <div id="chipArea"></div>
+            
+            <!-- 提示訊息(提醒玩家下注) -->
+            <div id="prompt">PLEASE PLACE A BET!</div>
+            
+            <!-- 顯示遊戲輸贏結果 -->
+            <div id="result">
+                <div id="resultText"></div>
+                <button id="playAgain" onclick="playAgain()">PLAY</button>
+            </div>
+
+            <!-- 顯示玩家該局的下注金額及擁有多少錢 -->
+            <div id="info">
+                <div id="bet"></div>
+                <div id="bank"></div>
+            </div>
+        </div>
+
+        <!-- 桌子底部(負責顯示籌碼及玩家可執行的動作) -->
+        <div id="desk_wood">
+            <!-- 籌碼區 -->
+            <div id="chip">
+                <img src="./img/chip5.png" alt="chip5" id="chip5">
+                <img src="./img/chip10.png" alt="chip10" id="chip10">
+                <img src="./img/chip25.png" alt="chip25" id="chip25">
+                <img src="./img/chip100.png" alt="chip100" id="chip100">
+            </div>
+
+            <!-- 玩家可執行的動作區 -->
+            <div id="buttonArea">
+                <!-- <button id="deal" class="button_samll" onclick="testSplit()">DEAL</button> -->
+                <button id="deal" class="button_samll" onclick="deal_first()">DEAL</button>
+                <button id="split" class="button_samll" onclick="split()">SPLIT</button>
+                <button id="double" class="button_medium" onclick="double()">DOUBLE</button>
+                <button id="hit" class="button_medium" onclick="hit()">HIT</button>
+                <button id="stand" class="button_medium" onclick="stand()">STAND</button>
+                <button id="surrender" class="button_large" onclick="surrender()">SURRENDER</button>
+                <button id="cheat" class="button_large" onclick="cheat()">CHEAT: OFF</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<!--
+H34081050 陳宥霖 第四次作業 5/17
+H34081050 CHEN YU-LIN The fourth Homework 5/17
+-->

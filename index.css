@@ -1,0 +1,366 @@
+html, body {
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 主畫面 */
+#homePage {
+    position: absolute;
+    width: 100%;
+    height: 85%;
+    text-align: center;
+}
+
+/* 主畫面遊戲Logo */
+#blackjack-logo {
+    position: absolute;
+    top: 15%;
+    height: 85%;
+    width: 100%;
+}
+
+#blackjack-logo img {
+    height: 55%;
+}
+
+/* 開始遊戲按鈕 */
+#play_button {
+    position: absolute;
+    width: 100%;
+    height: 20%;
+    bottom: 10%;
+}
+
+#play_button img {
+    height: 100%;
+}
+#desk {
+    width: 100%;
+    height: 100%;
+}
+
+/* 桌子綠色區域(負責顯示主要遊戲畫面) */
+#desk_green {
+    width: 100%;
+    height: 85%;
+    /* height: 540px; */
+    text-align: center;
+    background-image: url(./img/desk_green.jpg);
+    background-repeat: repeat;
+    background-size: 100%;
+}
+
+/* 頂部控制列 */
+#controlBar {
+    position: absolute;
+    width: 98%;
+    height: 10%;
+   padding: 1% 1% 0 1%;
+}
+
+#controlBar img {
+    height: 100%;
+    width: 3%;
+}
+
+#home img {
+    float: left;
+}
+
+#pause img {
+    float: right;
+}
+
+
+
+
+
+/* 顯示莊家及玩家點數 */
+.pointInfo {
+    position: absolute;
+    left: 20%;
+    display: none;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    border-radius: 50%;
+    background-color: white;
+    font-size: large;
+    color: black;
+}
+
+#dealerPoint {
+    top: 5%;
+}
+
+#playerPoint {
+    top: 50%;
+}
+
+#split1Point {
+    top: 50%;
+    left: 8%;
+}
+
+#split2Point {
+    top: 50%;
+    left: 58%;
+}
+
+/* 顯示卡片 */
+#cardArea {
+    height: 100%;
+    width: 100%;
+    display: none;
+}
+
+#dealerCards {
+    /* position: relative; */
+    /* margin-top: 30px; */
+    height: 40%;
+    margin-top: -2%;
+}
+
+#playerCards {
+    height: 40%;
+    margin-top: 2%;
+    /* display: none; */
+}
+
+#playerCards img, #dealerCards img{
+    /* position: relative; */
+    height: 85%;
+    margin-left: -5%; /* 使卡片部分重疊*/
+}
+
+#split1Cards, #split2Cards{
+    /* display: inline-block; */
+    float: left;
+    height: 40%;
+    width: 50%;
+    margin: 0;
+    display: none;
+}
+
+#split1Cards img, #split2Cards img{
+    /* position: relative; */
+    height: 85%;
+    margin-left: -10%;
+}
+
+/* 顯示下注時丟出的籌碼 */
+#chipArea {
+    position: absolute;
+    height: 30%;
+    width: 100%;
+    bottom: 35%;
+    text-align: center;
+}
+
+#chipArea img {
+    position: relative;
+    height: 65%;
+    margin-left: -7.5%;
+}
+
+/* 提示訊息(提醒玩家下注) */
+#prompt {
+    display: none;
+    position: absolute;
+    top: 30%;
+    left: 30%;
+    width: 40%;
+    height: 65px;
+    border-radius: 20px;
+    background-color: rgb(255, 255, 255);
+    text-align: center;
+    font-size: 30px;
+    line-height: 65px;
+}
+
+/* 顯示遊戲輸贏結果 */
+#result {
+    display: none;
+    position: absolute;
+    top: 20%;
+    left: 60%;
+    width: 20%;
+    height: 25%;
+    border-radius: 20px;
+    background-color: rgb(231, 227, 143);
+    border: 5px solid rgb(244, 244, 244);
+    text-align: center;
+}
+#result h1 {
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+#result h2 {
+    margin: 0px;
+}
+
+#resultText {
+    position: relative;
+    text-align: center;
+    width: 100%;
+    height: 50%;
+}
+
+#playAgain {
+    position: relative;
+    margin-top: 5%;
+    width: 30%;
+    height: 20%;
+    font-size: larger;
+    border-radius: 40px;
+}
+
+/* 顯示玩家該局的下注金額及擁有多少錢 */
+#info {
+    position: absolute;
+    top: 78%;
+    width: 100%;
+}
+
+#info div {
+    /* display: inline-block; */
+    font-size: 30px;
+    color: white;
+}
+
+#bet {
+    position: relative;
+    float: left;
+    margin-left: 2%;
+}
+
+#bank {
+    position: relative;
+    float: right;
+    margin-right: 2%;
+}
+
+/* 桌子底部(負責顯示籌碼及玩家可執行的動作) */
+#desk_wood {
+    width: 100%;
+    height: 15%;
+    /* height: 100px; */
+    background-image: url(./img/wood.jpg);
+    background-repeat: repeat-x;
+    /* background-size: 1500px; */
+    background-size: 100%;
+}
+
+/* 籌碼區 */
+#chip {
+    height: 100%;
+    width: 35%;
+    display: none;
+    float: left;
+}
+
+#chip img {
+    height: 100%;
+}
+
+/* 玩家可執行的動作區 */
+#buttonArea {
+    height: 100%;
+    width: 60%;
+    float: left;
+}
+
+/* deal, split */
+.button_samll {
+    float: left;
+    margin: 1% 2% 1% 0%;
+    width: 9.3%;
+    height: 80%;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 17px;
+    border:5px solid rgb(255, 255, 255);
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+}
+
+/* double, hit, stand*/
+.button_medium {
+    float: left;
+    margin: 1% 2% 1% 0%;
+    width: 12%;
+    height: 80%;
+    border-radius: 50px;
+    text-align: center;
+    font-size: 17px;
+    border:5px solid rgb(255, 255, 255);
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+    line-height:330%;
+}
+
+/* surrender, cheat */
+.button_large {
+    float: left;
+    margin: 1% 2% 1% 0%;
+    width: 18%;
+    height: 80%;
+    border-radius: 50px;
+    text-align: center;
+    line-height:320%;
+    font-weight: bold;
+    color: rgb(255, 255, 255);
+}
+
+/* button為disable狀態時透明度為0.6 */
+button:disabled {
+    opacity: 0.6;
+}
+
+/* 各動作button的style */
+#deal {
+    display: none;
+    background-color: rgb(143, 125, 137);
+    /* border-color: rgb(96, 84, 84); */
+}
+
+#double {
+    display: none;
+    background-color: rgb(223, 135, 124);
+}
+
+#hit {
+    display: none;
+    background-color: rgba(222, 190, 111, 0.903);
+}
+
+#stand {
+    display: none;
+    background-color: rgb(102, 170, 164);
+}
+
+#split {
+    display: none;
+}
+
+#surrender {
+    display: none;
+    border:5px solid rgb(255, 255, 255);
+    background-color: rgba(177, 171, 171, 0.903);
+    font-size: 17px;
+}
+
+#cheat {
+    display: none;
+    float: right;
+    border:5px solid rgb(0, 0, 0);
+    font-size: 20px;
+    background-color: black;
+}
+
+
+/* H34081050 陳宥霖 第四次作業 5/17
+H34081050 CHEN YU-LIN The fourth Homework 5/17 */
