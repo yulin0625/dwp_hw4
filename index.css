@@ -36,6 +36,47 @@ html, body {
 #play_button img {
     height: 100%;
 }
+
+#AD {
+    display: none;
+    z-index: 2;
+    position: absolute;
+    top:10%;
+    left:35%;
+    height: 400px;
+    width: 400px;
+    text-align: center;
+    /* background-color: rgba(128, 128, 128, 0.885); */
+}
+
+#AD img{
+    height: 400px;
+    width: 400px;
+}
+
+#closeAD {
+    position: absolute;
+    z-index: 3;
+    top:0;
+    right: 0;
+    width: 13%;
+    height: 6%;
+    background-color: rgba(255, 255, 255, 0.776);
+}
+
+/* 頂部控制列 */
+#controlBar {
+    position: absolute;
+    width: 98%;
+    height: 10%;
+    padding: 1% 1% 0 1%;
+}
+
+#controlBar img {
+    height: 100%;
+    width: 3%;
+}
+
 #desk {
     width: 100%;
     height: 100%;
@@ -52,18 +93,6 @@ html, body {
     background-size: 100%;
 }
 
-/* 頂部控制列 */
-#controlBar {
-    position: absolute;
-    width: 98%;
-    height: 10%;
-   padding: 1% 1% 0 1%;
-}
-
-#controlBar img {
-    height: 100%;
-    width: 3%;
-}
 
 #home img {
     float: left;

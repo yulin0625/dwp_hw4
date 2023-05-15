@@ -478,13 +478,11 @@ function double(){
     }
 }
 
-
-
 function hit(){
     window.clearInterval(timer);
     setTime(10);
     timer = window.setInterval(autoStand, 1000);
-    
+
     writeLog("Hit");
     $("#double").hide();
     if(is_split){
@@ -577,8 +575,22 @@ function writeLog(msg){
 }
 
 function playAgain(){
-    reset();
     writeLog("Play Again");
+    reset();
+    showAD();
+}
+
+function showAD(){
+    let random = Math.floor(Math.random()*3) + 1
+    let imgPath = `./img/ad${random}.jpg`;
+    $("#AD img").attr("src", `${imgPath}`);
+    $("#AD").show();
+}
+
+function closeAD(){
+    $("#AD").hide();
+    setTime(10);
+    timer = window.setInterval(autoBet, 1000);
 }
 
 function reset(){
@@ -635,7 +647,7 @@ function reset(){
     showBetAndBank();
 
     setTime(10);
-    timer = window.setInterval(autoBet, 1000);
+    // timer = window.setInterval(autoBet, 1000);
 }
 
 function start(){
@@ -665,6 +677,8 @@ function startGame(){
     reset();
     $("#homePage").hide();
     $("#timeleft").show();
+    setTime(10);
+    timer = window.setInterval(autoBet, 1000);
 }
 
 function setTime(sec){
@@ -703,6 +717,11 @@ $(document).ready(function(){
     // 暫停鍵 todo
     $("#pause_icon").click(function(){
         pause();
+    });
+
+    //AD
+    $("#closeAD").click(function(){
+        closeAD();
     });
 
     // 主畫面
