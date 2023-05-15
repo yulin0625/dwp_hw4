@@ -73,9 +73,20 @@ html, body {
     float: right;
 }
 
-
-
-
+#timeleft {
+    display: none;
+    position:absolute;
+    top: 12%;
+    right: 2%;
+    width: 180px;
+    height: 80px;
+    line-height: 80px;
+    border-radius: 10px;
+    font-size: 30px;
+    border: 3px solid rgb(244, 244, 244);
+    background-color: rgba(170, 170, 170, 0.759);
+    color:rgb(0, 0, 0);
+}
 
 /* 顯示莊家及玩家點數 */
 .pointInfo {
