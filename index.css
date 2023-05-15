@@ -159,10 +159,28 @@ html, body {
     text-align: center;
 }
 
+#resetBet {
+    /* float: left; */
+    position: absolute;
+    bottom: 20%;
+    left: 45%;
+    /* margin: 1% 2% 1% 0%; */
+    width: 10%;
+    height: 10%;
+    border-radius: 50px;
+    text-align: center;
+    line-height:320%;
+    font-weight: bold;
+    border:5px solid rgb(255, 255, 255);
+    color: rgb(255, 255, 255);
+    background-color: cadetblue;
+    font-size: 18px;
+}
+
 #chipArea img {
     position: relative;
     height: 65%;
-    margin-left: -7.5%;
+    margin-left: -95px;
 }
 
 /* 提示訊息(提醒玩家下注) */
