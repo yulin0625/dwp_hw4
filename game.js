@@ -33,6 +33,7 @@ function assignChips(chipValue){
     playerMoney -= chipValue;
     showBetAndBank();
     $("#deal").attr("disabled", false);
+    $("#resetBet").attr("disabled", false);
     $("#prompt").hide();
     checkMoney();
     // writeLog(`Add ${chipValue}, Total Bet: ${playerBet}`);
@@ -102,6 +103,9 @@ function resetBet(){
     playerMoney += playerBet;
     playerBet = 0;
     $("#chipArea").text(""); // 清空桌上的chip
+    $("#prompt").show();
+    $("#resetBet").attr("disabled", true);
+    $("#deal").attr("disabled", true);
     showBetAndBank();
     // todo log
 }
@@ -113,8 +117,215 @@ function showBetAndBank(){
 }
 
 function deal_first(){
+    let card1Number;
+    let card2Number;
+    let card1Value;
+    let card2Value;
+
     // 清空桌面上的chip
     $("#chipArea").hide();
+    $("#chip").css("visibility", "hidden");
+    $("#resetBet").hide();
+    // 顯示卡片及點數
+    $("#cardArea").show();
+    $("#playerPoint").show();
+
+    // action button
+    $("#deal").hide();
+    $("#double").show();
+    $("#hit").show();
+    $("#stand").show();
+    $("#surrender").show();
+    $("#cheat").show();
+    // todo write log
+
+    // 莊家抽牌
+    drawCard("dealer");
+    hideCardNumber = drawCard("dealer", true)[0];
+    // 玩家抽牌
+    [card1Number, card1Value] = drawCard("player");
+    [card2Number, card2Value] = drawCard("player");
+    if(card1Value == card2Value){
+        split1CardNumber = card1Number;
+        split2CardNumber = card2Number;
+        $("#split").show();
+    }
+}
+
+// 抽牌 person:"dealer", "player"; hide: true, false
+function drawCard(person, hide){ 
+    let cardNumber;
+    let cardValue;
+    let get_A = false;
+
+    // cheat
+    if(person == "dealer" &&  dealerCheat && playerPoint > 0){
+        // let maxValue = 21 - dealerPoint; // 最多只能抽到max點
+        // let minValue = playerPoint - dealerPoint + 1; // 最少要抽到min點
+        // if(dealerPoint <= playerPoint){ // min > 0
+        //     [cardNumber, cardValue] = findCheatCard(maxValue, minValue);
+        // }
+        // else{
+        //     [cardNumber, cardValue] = findCheatCard(maxValue);
+        // }
+
+        // if(cardValue == 1 || cardValue == 1){
+        //     writeLog(`莊家抽到A`);
+        // }
+        // else{
+        //     writeLog(`莊家抽到${cardValue}點`);
+        // }
+    }
+    else{
+        cardNumber = getCardNumber();
+        cardValue = getCardValue(cardNumber);
+    
+        if(cardValue == 1){ // 玩家抽到A
+            get_A = true;
+        }
+    
+        if(person == "dealer"){
+            if(get_A){
+                dealer_has_A = true;
+                if(dealerPoint + 11 <= 21){ // A當11
+                    dealerPoint += 11;
+                    dealer_A_is_11 = true;
+                }
+                else{
+                    dealerPoint += 1;
+                }
+                // writeLog("莊家抽到A");
+            }
+            else{ // 這次不是抽到A
+                dealerPoint += cardValue;
+                if(dealer_has_A){  // 牌堆有A
+                    if(dealer_A_is_11 && dealerPoint > 21){
+                        dealerPoint -= 10; // A當1
+                        dealer_A_is_11 = false;
+                    }
+                }
+                // writeLog(`莊家抽到${cardValue}點`);
+            }
+        }
+        else{ // player, split1, split2
+            if(get_A){
+                player_has_A = true;
+                if(playerPoint + 11 <= 21){ // A當11
+                    playerPoint += 11;
+                    player_A_is_11 = true;
+                }
+                else{
+                    playerPoint += 1;
+                }
+                // writeLog("玩家抽到A");
+            }
+            else{
+                playerPoint += cardValue;
+                if(player_has_A){  // 牌堆有A
+                    if(player_A_is_11 && playerPoint > 21){
+                        playerPoint -= 10; // A當1
+                        player_A_is_11 = false;
+                    }
+                }
+                // writeLog(`玩家抽到${cardValue}點`);
+            }
+        }
+    }
+
+
+    if(hide){
+        displayCard(person, "cover");
+    }
+    else{
+        displayCard(person, cardNumber);
+    }
+    renewPoint();
+    return [cardNumber, cardValue];
+
+}
+
+// 取得一個random的CardNumber(使用4副牌)
+function getCardNumber(){
+    let cardnumber = Math.floor(Math.random()*52) + 1;
+    while(deck[cardnumber] > 4)
+        cardnumber = Math.floor(Math.random()*52) + 1;
+    deck[cardnumber] += 1;
+    return cardnumber;
+}
+
+// 計算卡片的點數
+function getCardValue(cardnumber){
+    let point = cardnumber % 13;
+    if(point==0 || point > 10)
+        point = 10;
+    return point;
+}
+
+function displayCard(person, cardNumber){
+    let imgPath = `./img/cards/${cardNumber}.png`;
+    let cardArea;
+    if(person == "dealer")
+        cardArea = $("#dealerCards");
+    else if(person == "player")
+        cardArea = $("#playerCards");
+    else if(person == "split1"){
+        cardArea = $("#split1Cards");
+    }
+    else if(person == "split2"){
+        cardArea = $("#split2Cards");
+    }
+
+    cardArea.append(`<img src=${imgPath} alt=card${cardNumber}></img>`);
+}
+
+function renewPoint() {
+    $("#dealerPoint").text(dealerPoint);
+    $("#playerPoint").text(playerPoint);
+
+    if(is_split){
+        if(split_round == 1){
+            $("#split1Point").text(playerPoint);
+        }
+        else{
+            $("#split2Point").text(playerPoint);
+        }
+    }
+}
+
+// 翻開莊家原本覆蓋的卡片
+function displayHideCard(){
+    let imgPath = `./img/cards/${hideCardNumber}.png`;
+    // document.querySelector("#dealerCards img:nth-child(2)").src = imgPath;
+    $("#dealerCards img:nth-child(2)").attr("src", imgPath);
+    $("#dealerPoint").show();
+}
+
+
+function split(){
+
+}
+
+function double(){
+
+}
+
+function hit(){
+
+}
+
+function stand(){
+
+}
+
+function hit(){
+
+}
+
+function surrender(){
+
+}
+
+function cheat(){
 
 }
 
@@ -145,6 +356,7 @@ function reset(){
     $("#playerCards").text("");
     $("#chipArea").text("");
 
+    $("#cardArea").hide();
     $("#chipArea").show();
     $("#resetBet").show();
     
@@ -154,7 +366,8 @@ function reset(){
 
     $("#chip").show();
     $("#chip").css("visibility", "visible");
-    
+    $("#resetBet").attr("disabled", true);
+
     $("#buttonArea").show();
     $("#deal").show();
     $("#deal").attr("disabled", true);
@@ -221,9 +434,29 @@ $(document).ready(function(){
         resetBet();
     });
 
+    // action button
     $("#deal").click(function(){
         deal_first();
     });
+    $("#split").click(function(){
+        split();
+    });        
+    $("#double").click(function(){
+        double();
+    });
+    $("#hit").click(function(){
+        hit();
+    });
+    $("#stand").click(function(){
+        stand();
+    });
+    $("#surrender").click(function(){
+        surrender();
+    });
+    $("#cheat").click(function(){
+        cheat();
+    });    
+    
     // 暫停鍵 todo
     // $("pause_icon").click(pause());
 });
