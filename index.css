@@ -82,8 +82,8 @@ html, body {
 }
 
 #log img {
-    float: left;
-    margin-left: 15px;
+    float: right;
+    margin-right: 15px;
 }
 
 #pause img {
