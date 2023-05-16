@@ -20,17 +20,20 @@ var is_split; // boolean
 var split_round; // split時，玩兩個round
 var dealerCheat; // boolean
 var gamePause; // boolean
-var logCount;
 var timer;
 var timeLeft;
+var totalTime;
 
 const chipValue = [5, 10, 25, 100];
 const deck = Array(53).fill(0); // 0~52 (0不使用)
 var chipButton = [];
 
 // log
-var gameid;
-var gameLog;
+var logCount;
+var currentGameLog;
+var gameCount;
+var gameResult;
+var historyGameLog;
 
 // function
 function assignChips(chipValue){
@@ -106,6 +109,7 @@ function checkMoney(){
 
 // 重新下注
 function resetBet(){
+    writeLog("Reset Bet");
     playerMoney += playerBet;
     playerBet = 0;
     $("#chipArea").text(""); // 清空桌上的chip
@@ -113,7 +117,6 @@ function resetBet(){
     $("#resetBet").attr("disabled", true);
     $("#deal").attr("disabled", true);
     showBetAndBank();
-    // todo log
 }
 
 // 顯示Bet及Bank資訊
@@ -124,6 +127,7 @@ function showBetAndBank(){
 
 function deal_first(){
     // todo write log
+    writeLog("Deal");
     window.clearTimeout(timer);
     let card1Number;
     let card2Number;
@@ -309,7 +313,6 @@ function displayHideCard(){
     $("#dealerPoint").show();
 }
 
-
 function split(){
     writeLog("Split");
     window.clearInterval(timer);
@@ -344,33 +347,41 @@ function showResult(result){
         case "playerBust":
             textArea.html("<h1>BUST!</h1><h2>You Lost!</h2>");
             writeLog("BUST! Player Lost");
+            gameResult["result"] = "BUST! Player Lost";
             break;
         case "dealerBust":
             textArea.html("<h1>Dealer BUST!</h1><h2>You Win!</h2>");
             writeLog("Dealer BUST! Player Win");
+            gameResult["result"] = "Dealer BUST! Player Win";
             break;
         case "playerWin":
             textArea.html("<h1>You Wins!</h1>");
             writeLog("Player Win");
+            gameResult["result"] = "Player Win";
             break;
         case "dealerWin":
             textArea.html("<h1>Dealer Wins!</h1><h2>You Lost</h2>");
             writeLog("Player Lost");
+            gameResult["result"] = "Player Lost";
             break;
         case "push":
             textArea.html("<h1>PUSH</h1>");
             writeLog("Push");
+            gameResult["result"] = "Push";
             break;
         case "surrender":
             textArea.html("<h1>Surrender</h1>");
             writeLog("Player Surrender");
+            gameResult["result"] = "Player Surrender";
         default:
     }
+    gameResult["time"] = totalTime;
     
     $("#result").show();
     $("#chip").hide();
     $("#buttonArea").hide();
     showBetAndBank();
+    
 }
 
 // 莊家抽牌
@@ -402,21 +413,25 @@ function isBust(person){
 // 檢查點數
 function checkPoint() {
     dealerDrawCards(); // 莊家抽牌(若點數<17)
-    if(is_split){
+    if(is_split){  // todo write split history
         if(split_round == 1){
             if(isBust("dealer")){
                 playerMoney += 2 * splitBet;
+                gameResult["Balance"] = `+${splitBet}`;
                 writeLog("Dealer BUST! Player Win");
             }
             else if(split1Point > dealerPoint){
                 playerMoney += 2 * splitBet;
+                gameResult["Balance"] = `+${splitBet}`;
                 writeLog("Player Win");
             }
             else if(split1Point < dealerPoint){
+                gameResult["Balance"] = `-${splitBet}`;
                 writeLog("Player Lost");
             }
             else{ // 平手
                 playerMoney += splitBet;
+                gameResult["Balance"] = "0";
                 writeLog("Push");
             }
             split_round = 2;
@@ -424,10 +439,12 @@ function checkPoint() {
         else{
             if(isBust("dealer")){
                 playerMoney += 2 * splitBet;
+                gameResult["Balance"] = `+${splitBet}`;
                 showResult("dealerBust");
             }
             else if(split2Point > dealerPoint){
                 playerMoney += 2 * splitBet;
+                gameResult["Balance"] = `+${splitBet}`;
                 showResult("playerWin");
             }
             else if(split2Point < dealerPoint){
@@ -457,7 +474,6 @@ function checkPoint() {
         }
     }
 }
-
 
 function double(){
     if(playerMoney >= playerBet){ // 可double
@@ -516,7 +532,7 @@ function hit(){
 }
 
 function stand(){
-    writeLog("stand");
+    writeLog("Stand");
     window.clearInterval(timer);
     if(is_split){
         if(split_round == 1){
@@ -534,7 +550,7 @@ function stand(){
 }
 
 function surrender(){
-    writeLog("surrender")
+    writeLog("Surrender")
     playerMoney += playerBet/2; // 拿回一半的錢
     showResult("surrender");
 }
@@ -557,17 +573,24 @@ function pause(){
 
     if(gamePause){
         btn.attr("src", "./img/play-button.png");
-        writeLog("pause game");
+        writeLog("Pause game");
     }
     else{
         btn.attr("src", "./img/pause.png");
-        writeLog("continue game");
+        writeLog("Continue game");
     }
 
 }
 
-function writeLog(key, value){
-    // sessionStorage.setItem(key, value);
+function writeHistory(gameResult){
+    localStorage.setItem(`${gameCount}`, JSON.stringify(gameResult));
+}
+
+function writeLog(msg){
+    logCount += 1;
+    currentGameLog[logCount.toString()] = msg;
+    sessionStorage.setItem("currentGameLog", JSON.stringify(currentGameLog));
+    // localStorage.setItem("logCount", logCount.toString());
     // document.querySelector("#log > table").innerHTML += 
     // `<tr>
     //     <td>${logCount}</td>
@@ -578,6 +601,20 @@ function writeLog(key, value){
     //     <td>${dealerCheat}</td>
     // </tr>`;
     // ++logCount;
+}
+
+function showLog(){
+    // current game log
+    let logs = JSON.parse(sessionStorage.getItem("currentGameLog"));
+    let txt = '<caption>Current Game (Session Storage)</caption> \
+        <tr> \
+        <th id="logID">Log ID</th> \
+        <th>Messange</th> \
+        </tr>';
+    for(let log in logs){
+        txt += "<tr><td>" + log + "</td><td>"+ logs[log] + "</td>";
+    }
+    $("#currentGameLog").html(txt);
 }
 
 function playAgain(){
@@ -620,6 +657,9 @@ function reset(){
     split2CardNumber = 0;
     is_split = false;
     split_round = 1; // split時，玩兩個round
+
+    gameResult = []; // 清空gameResult
+
     // 清空桌面
     $("#prompt").show();
     $("#dealerCards").text("");
@@ -656,9 +696,44 @@ function reset(){
     // timer = window.setInterval(autoBet, 1000);
 }
 
+function readGameHistory(){
+    if(localStorage.getItem("gameCount")){
+        gameCount = parseInt(localStorage.getItem("gameCount"));
+    }
+    else{
+        gameCount = 0;
+        localStorage.setItem("gameCount", "0");
+    }
+
+    if(localStorage.getItem("logCount")){
+        logCount = parseInt(localStorage.getItem("logCount"));
+    }
+    else{
+        logCount = 0;
+        localStorage.setItem("logCount", "0");
+    }
+
+    if(localStorage.getItem("playerMoney")){
+        playerMoney = localStorage.getItem("playerMoney");
+    }
+    else{
+        playerMoney = 1000;
+        localStorage.setItem("playerMoney", "1000");
+        alert("set Money");
+    }
+
+    if(localStorage.getItem("historyGameLog")){
+        JSON.parse(localStorage.getItem("historyGameLog"));
+    }
+}
+
 function start(){
-    logCount = 0;
-    playerMoney = 1000;
+    // logCount = 0; // 每次game都歸零
+    currentGameLog = {}; // object
+    historyGameLog = []; // array
+    readGameHistory();
+
+    // playerMoney = 1000;
     dealerCheat = false;
 
     $(".pointInfo").hide();
@@ -676,11 +751,13 @@ function start(){
     $("#surrender").hide();
     $("#cheat").hide();
     // showBetAndBank();
-    writeLog("Game Start");
 }
 
 function startGame(){
+    writeLog("Game Start");
     reset();
+    ++gameCount;
+    localStorage.setItem("gameCount", gameCount.toString());
     $("#homePage").hide();
     $("#timeleft").show();
     setTime(10);
@@ -700,8 +777,9 @@ function autoBet(){
     if(!gamePause){
         timeLeft -= 1;
         updateTimeLeft(); // 更新畫面中的秒數
-    
+        
         if(timeLeft == 0){
+            writeLog("Timeout! Auto Bet");
             window.clearInterval(timer);
             if(playerBet==0){
                 assignChips(100); // 自動下注100
@@ -715,8 +793,9 @@ function autoStand(){
     if(!gamePause){
         timeLeft -= 1;
         updateTimeLeft(); // 更新畫面中的秒數
-    
+        
         if(timeLeft == 0){
+            writeLog("Timeout! Auto Stand");
             window.clearInterval(timer);
             stand();
         }
@@ -769,10 +848,29 @@ function autoStand(){
 
 $(document).ready(function(){
     start();
+    setInterval(showLog, 1000);
     // tool bar
-    // 暫停鍵 todo
+    // home鍵 todo
+    // $("#home").click(function(){
+        
+    // });
+
+    // 暫停鍵
     $("#pause_icon").click(function(){
         pause();
+    });
+    // log鍵
+    $("#log").click(function(){
+        gamePause = true; // 看log時暫停倒數計時
+        $("#gameLog").show(); // 按log鈕可以開/關Log頁面
+    });
+
+    $("#closeLog").click(function(){
+        gamePause = !gamePause;
+        if(!gamePause){
+            $("#pause img").attr("src", "./img/pause.png");
+        }
+        $("#gameLog").hide();
     });
 
     //AD
