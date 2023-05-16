@@ -77,6 +77,19 @@ html, body {
     width: 3%;
 }
 
+#home img {
+    float: left;
+}
+
+#log img {
+    float: left;
+    margin-left: 15px;
+}
+
+#pause img {
+    float: right;
+}
+
 #desk {
     width: 100%;
     height: 100%;
@@ -94,13 +107,6 @@ html, body {
 }
 
 
-#home img {
-    float: left;
-}
-
-#pause img {
-    float: right;
-}
 
 #timeleft {
     display: none;

@@ -691,25 +691,75 @@ function updateTimeLeft(){
 }
 
 function autoBet(){
-    timeLeft -= 1;
-    updateTimeLeft(); // 更新畫面中的秒數
-
-    if(timeLeft == 0){
-        window.clearInterval(timer);
-        assignChips(100);
-        deal_first();
+    if(!gamePause){
+        timeLeft -= 1;
+        updateTimeLeft(); // 更新畫面中的秒數
+    
+        if(timeLeft == 0){
+            window.clearInterval(timer);
+            if(playerBet==0){
+                assignChips(100); // 自動下注100
+            }
+            deal_first();
+        }
     }
 }
 
 function autoStand(){
-    timeLeft -= 1;
-    updateTimeLeft(); // 更新畫面中的秒數
-
-    if(timeLeft == 0){
-        window.clearInterval(timer);
-        stand();
+    if(!gamePause){
+        timeLeft -= 1;
+        updateTimeLeft(); // 更新畫面中的秒數
+    
+        if(timeLeft == 0){
+            window.clearInterval(timer);
+            stand();
+        }
     }
 }
+
+// function testSplit(){
+//     let card1Number;
+//     let card2Number;
+//     let card1Value;
+//     let card2Value;
+//     document.getElementById("chipArea").style.display = "none";
+//     document.getElementById("result").style.display = "none";
+//     document.getElementById("card").style.display = "block";
+//     // document.getElementById("dealerPoint").style.display = "none";
+//     document.getElementById("playerPoint").style.display = "inline-block";
+//     writeLog("第一輪發牌");
+
+//     // 莊家抽牌
+//     drawCard("dealer");
+//     hideCardNumber = drawCard("dealer", true)[0];
+    
+//     // 玩家抽牌
+//     card1Number = 10;
+//     card1Value = 10;
+//     playerPoint += card1Value;
+//     displayCard("player", card1Number);
+//     writeLog(`玩家抽到${card1Value}`);
+//     card2Number = 11;
+//     card2Value = 10;
+//     playerPoint += card2Value;
+//     displayCard("player", card2Number);
+//     writeLog(`玩家抽到${card2Value}`);
+
+//     // disable chip
+//     document.getElementById("chip").style.visibility = "hidden";
+    
+//     // show button
+//     document.getElementById("deal").style.display = "none";
+//     document.getElementById("double").style.display = "inline-block";
+//     document.getElementById("hit").style.display = "inline-block";
+//     document.getElementById("stand").style.display = "inline-block";
+//     document.getElementById("surrender").style.display = "inline-block";
+//     if(card1Value == card2Value){
+//         split1CardNumber = card1Number;
+//         split2CardNumber = card2Number;
+//         document.getElementById("split").style.display = "inline-block";
+//     }
+// }
 
 $(document).ready(function(){
     start();
