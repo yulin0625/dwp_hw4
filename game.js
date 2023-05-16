@@ -28,6 +28,10 @@ const chipValue = [5, 10, 25, 100];
 const deck = Array(53).fill(0); // 0~52 (0不使用)
 var chipButton = [];
 
+// log
+var gameid;
+var gameLog;
+
 // function
 function assignChips(chipValue){
     displayChip(chipValue);
@@ -531,6 +535,7 @@ function stand(){
 
 function surrender(){
     writeLog("surrender")
+    playerMoney += playerBet/2; // 拿回一半的錢
     showResult("surrender");
 }
 
@@ -561,7 +566,8 @@ function pause(){
 
 }
 
-function writeLog(msg){
+function writeLog(key, value){
+    // sessionStorage.setItem(key, value);
     // document.querySelector("#log > table").innerHTML += 
     // `<tr>
     //     <td>${logCount}</td>
