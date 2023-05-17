@@ -205,7 +205,7 @@ function drawCard(person, hide){
         }
     }
     else{ // player, split1, split2
-        if(!dealerCheat || !dealFinish || playerPoint < 11){ // 沒有cheat或還在第一輪發牌
+        if(!dealerCheat || !dealFinish || playerPoint < 12){ // 沒有cheat或還在第一輪發牌或無法該回合讓玩家點數>21
             if(get_A){
                 player_has_A = true;
                 if(playerPoint + 11 <= 21){ // A當11
