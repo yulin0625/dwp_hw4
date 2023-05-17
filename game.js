@@ -34,7 +34,7 @@ var currentGameLog;
 var gameCount;
 var gameResult;
 var historyGameLog;
-
+var sortBy;
 // function
 function assignChips(chipValue){
     displayChip(chipValue);
@@ -342,46 +342,67 @@ function split(){
 //todo
 function showResult(result){
     window.clearInterval(timer);
+
+    let bet;
+    if(is_split){
+        bet = splitBet;
+    }
+    else{
+        bet = playerBet;
+    }
+    gameResult['chip'] = `${bet}`;
+
     let textArea = $("#resultText");
     switch(result){
         case "playerBust":
             textArea.html("<h1>BUST!</h1><h2>You Lost!</h2>");
             writeLog("BUST! Player Lost");
             gameResult["result"] = "BUST! Player Lost";
+            gameResult["balance"] = `-${bet}`;
             break;
         case "dealerBust":
             textArea.html("<h1>Dealer BUST!</h1><h2>You Win!</h2>");
             writeLog("Dealer BUST! Player Win");
             gameResult["result"] = "Dealer BUST! Player Win";
+            gameResult["balance"] = `+${bet}`;
             break;
         case "playerWin":
             textArea.html("<h1>You Wins!</h1>");
             writeLog("Player Win");
             gameResult["result"] = "Player Win";
+            gameResult["balance"] = `+${bet}`;
             break;
         case "dealerWin":
             textArea.html("<h1>Dealer Wins!</h1><h2>You Lost</h2>");
             writeLog("Player Lost");
             gameResult["result"] = "Player Lost";
+            gameResult["balance"] = `-${bet}`;
             break;
         case "push":
             textArea.html("<h1>PUSH</h1>");
             writeLog("Push");
             gameResult["result"] = "Push";
+            gameResult["balance"] = "0";
             break;
         case "surrender":
             textArea.html("<h1>Surrender</h1>");
             writeLog("Player Surrender");
             gameResult["result"] = "Player Surrender";
+            gameResult["balance"] = `-${bet/2}`;
         default:
     }
-    gameResult["time"] = totalTime;
-    
     $("#result").show();
     $("#chip").hide();
     $("#buttonArea").hide();
     showBetAndBank();
-    
+    writeLog(`Game${gameCount}:  Balance: ${gameResult["balance"]},  Player Bank: ${playerMoney},  Play Time:${totalTime}`)
+    localStorage.setItem("playerMoney", playerMoney.toString());
+
+    gameResult["gameID"] = gameCount;
+    gameResult["time"] = totalTime;
+    historyGameLog.push(gameResult);
+    localStorage.setItem("gameCount", gameCount);
+    localStorage.setItem("gameHistory", JSON.stringify(historyGameLog));
 }
 
 // 莊家抽牌
@@ -417,21 +438,18 @@ function checkPoint() {
         if(split_round == 1){
             if(isBust("dealer")){
                 playerMoney += 2 * splitBet;
-                gameResult["Balance"] = `+${splitBet}`;
+                
                 writeLog("Dealer BUST! Player Win");
             }
             else if(split1Point > dealerPoint){
                 playerMoney += 2 * splitBet;
-                gameResult["Balance"] = `+${splitBet}`;
                 writeLog("Player Win");
             }
             else if(split1Point < dealerPoint){
-                gameResult["Balance"] = `-${splitBet}`;
                 writeLog("Player Lost");
             }
             else{ // 平手
                 playerMoney += splitBet;
-                gameResult["Balance"] = "0";
                 writeLog("Push");
             }
             split_round = 2;
@@ -439,12 +457,10 @@ function checkPoint() {
         else{
             if(isBust("dealer")){
                 playerMoney += 2 * splitBet;
-                gameResult["Balance"] = `+${splitBet}`;
                 showResult("dealerBust");
             }
             else if(split2Point > dealerPoint){
                 playerMoney += 2 * splitBet;
-                gameResult["Balance"] = `+${splitBet}`;
                 showResult("playerWin");
             }
             else if(split2Point < dealerPoint){
@@ -582,10 +598,6 @@ function pause(){
 
 }
 
-function writeHistory(gameResult){
-    localStorage.setItem(`${gameCount}`, JSON.stringify(gameResult));
-}
-
 function writeLog(msg){
     logCount += 1;
     currentGameLog[logCount.toString()] = msg;
@@ -604,23 +616,79 @@ function writeLog(msg){
 }
 
 function showLog(){
-    // current game log
+    // current game log(session storage)
     let logs = JSON.parse(sessionStorage.getItem("currentGameLog"));
-    let txt = '<caption>Current Game (Session Storage)</caption> \
+    let logTable = 
+    '<caption>Current Game (Session Storage)</caption> \
         <tr> \
-        <th id="logID">Log ID</th> \
-        <th>Messange</th> \
-        </tr>';
+            <th id="logID">Log ID</th> \
+            <th>Messange</th> \
+        </tr>'; 
     for(let log in logs){
-        txt += "<tr><td>" + log + "</td><td>"+ logs[log] + "</td>";
+        logTable += "<tr><td>" + log + "</td><td>"+ logs[log] + "</td>";
     }
-    $("#currentGameLog").html(txt);
+    $("#currentGameLog").html(logTable);
+
+    // game history( from local storage)
+    let historyTable = 
+    '<caption>History (Local Storage)</caption> \
+        <tr> \
+            <th id="GameID">Game ID</th> \
+            <th>Result</th> \
+            <th>Chip</th> \
+            <th>Balance</th> \
+            <th>Time</th> \
+        </tr>';
+
+    let tmpLog;
+    if(sortBy == "chip"){ // sort by chip
+        tmpLog = historyGameLog.sort(function(a, b){
+                return parseInt(a['chip']) -  parseInt(b['chip']);
+        });
+    }
+    else if(sortBy == "time"){ // sort by time
+        tmpLog = historyGameLog.sort(function(a, b){
+            return parseInt(a['time']) -  parseInt(b['time']);
+        });
+    }
+    else {
+        tmpLog = historyGameLog.sort(function(a, b){
+            return parseInt(a['gameID']) -  parseInt(b['gameID']);
+        });
+    }
+    
+    for(let i=0; i < tmpLog.length; ++i){
+        historyTable += 
+        `<tr> \
+            <td>${tmpLog[i]['gameID']}</td> \
+            <td>${tmpLog[i]['result']}</td> \
+            <td>${tmpLog[i]['chip']}</td> \
+            <td>${tmpLog[i]['balance']}</td> \
+            <td>${tmpLog[i]['time']}</td> \
+        </tr>`;
+    }
+    $("#history").html(historyTable);
 }
 
 function playAgain(){
-    writeLog("Play Again");
+    ++gameCount;
+    writeLog(`Play Again. Game${gameCount} Start`);
     reset();
     showAD();
+}
+
+function disableAllChips(){
+    for(let btn of [5, 10, 25, 100]){
+        $(`#chip${btn}`).css("opacity", 0.5);
+        $(`#chip${btn}`).off("click");
+    }
+}
+
+function enableAllChips(){
+    for(let btn of [5, 10, 25, 100]){
+        $(`#chip${btn}`).css("opacity", 1);
+        $(`#chip${btn}`).click(function(){assignChips(btn)});
+    }
 }
 
 function showAD(){
@@ -628,10 +696,12 @@ function showAD(){
     let imgPath = `./img/ad${random}.jpg`;
     $("#AD img").attr("src", `${imgPath}`);
     $("#AD").show();
+    disableAllChips();
 }
 
 function closeAD(){
     $("#AD").hide();
+    enableAllChips();
     setTime(10);
     timer = window.setInterval(autoBet, 1000);
 }
@@ -658,7 +728,9 @@ function reset(){
     is_split = false;
     split_round = 1; // split時，玩兩個round
 
-    gameResult = []; // 清空gameResult
+    gameResult = {}; // 清空gameResult
+
+    totalTime = 0;
 
     // 清空桌面
     $("#prompt").show();
@@ -719,11 +791,10 @@ function readGameHistory(){
     else{
         playerMoney = 1000;
         localStorage.setItem("playerMoney", "1000");
-        alert("set Money");
     }
 
-    if(localStorage.getItem("historyGameLog")){
-        JSON.parse(localStorage.getItem("historyGameLog"));
+    if(localStorage.getItem("gameHistory")){
+        historyGameLog = JSON.parse(localStorage.getItem("gameHistory"));
     }
 }
 
@@ -735,7 +806,7 @@ function start(){
 
     // playerMoney = 1000;
     dealerCheat = false;
-
+    sortByChip = "GameID";
     $(".pointInfo").hide();
     $("#cardArea").hide();
     $("#split1Cards, #split2Cards").hide();
@@ -754,9 +825,9 @@ function start(){
 }
 
 function startGame(){
-    writeLog("Game Start");
     reset();
     ++gameCount;
+    writeLog(`Game${gameCount} Start`);
     localStorage.setItem("gameCount", gameCount.toString());
     $("#homePage").hide();
     $("#timeleft").show();
@@ -774,6 +845,7 @@ function updateTimeLeft(){
 }
 
 function autoBet(){
+    ++totalTime;
     if(!gamePause){
         timeLeft -= 1;
         updateTimeLeft(); // 更新畫面中的秒數
@@ -790,6 +862,7 @@ function autoBet(){
 }
 
 function autoStand(){
+    ++totalTime;
     if(!gamePause){
         timeLeft -= 1;
         updateTimeLeft(); // 更新畫面中的秒數
@@ -851,9 +924,27 @@ $(document).ready(function(){
     setInterval(showLog, 1000);
     // tool bar
     // home鍵 todo
-    // $("#home").click(function(){
-        
-    // });
+    $("#home").click(function(){
+        window.clearInterval(timer);
+        writeLog(`Back To Home. Game${gameCount} Over`);
+        $("#homePage").show();
+        $("#timeleft").hide();
+        $(".pointInfo").hide();
+        $("#cardArea").hide();
+        $("#split1Cards, #split2Cards").hide();
+        $("#prompt").hide();
+        $("#result").hide();
+        $("#chipArea").hide();
+        $("#chip").hide();
+        $("#resetBet").hide();
+        $("#deal").hide();
+        $("#double").hide();
+        $("#hit").hide();
+        $("#stand").hide();
+        $("#split").hide();
+        $("#surrender").hide();
+        $("#cheat").hide();
+    });
 
     // 暫停鍵
     $("#pause_icon").click(function(){
@@ -871,6 +962,18 @@ $(document).ready(function(){
             $("#pause img").attr("src", "./img/pause.png");
         }
         $("#gameLog").hide();
+    });
+
+    $("#sortByGameID").click(function(){
+        sortBy = "GameID";
+    });
+
+    $("#sortByChip").click(function(){
+        sortBy = "chip";
+    });
+
+    $("#sortByTime").click(function(){
+        sortBy = "time";
     });
 
     //AD

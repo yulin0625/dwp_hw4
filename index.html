@@ -104,23 +104,33 @@
         <img src="./img/close.png" alt="closeLog" id="closeLog">
         <h1>Game Log</h1>
         <div id="logArea">
-            <table id="currentGameLog">
-                <caption>Current Game (Session Storage)</caption>
-                <tr>
-                    <th id="logID">Log ID</th>
-                    <th>Messange</th>
-                </tr>
-            </table>
-            <table id="history">
-                <caption>History (Local Storage)</caption>
-                <tr>
-                    <th id="GameID">Game ID</th>
-                    <th>Result</th>
-                    <th>Chip</th>
-                    <th>Balance</th>
-                    <th>Time</th>
-                </tr>
-            </table>
+            <div id="logArea1">
+                <table id="currentGameLog">
+                    <caption>Current Game (Session Storage)</caption>
+                    <tr>
+                        <th id="logID">Log ID</th>
+                        <th>Messange</th>
+                    </tr>
+                </table>
+            </div>
+            <div id="logArea2">
+                <p>Sort by:
+                    <button id="sortByGameID">Game ID</button>
+                    <button id="sortByChip">Chip</button> 
+                    <button id="sortByTime">Time</button>
+                </p>
+
+                <table id="history">
+                    <caption>History (Local Storage)</caption>
+                    <tr>
+                        <th id="GameID">Game ID</th>
+                        <th>Result</th>
+                        <th>Chip</th>
+                        <th>Balance</th>
+                        <th>Time</th>
+                    </tr>
+                </table>
+            </div>
         </div>
     </div>
 </body>
