@@ -32,7 +32,7 @@ var logCount;
 var currentGameLog;
 var gameCount;
 var gameResult;
-var historyGameLog;
+var gameHistory;
 var sortBy;
 // function
 function assignChips(chipValue){
@@ -426,9 +426,9 @@ function showResult(result){
 
     gameResult["gameID"] = gameCount;
     gameResult["time"] = totalTime;
-    historyGameLog.push(gameResult);
+    gameHistory.push(gameResult);
     localStorage.setItem("gameCount", gameCount);
-    localStorage.setItem("gameHistory", JSON.stringify(historyGameLog));
+    localStorage.setItem("gameHistory", JSON.stringify(gameHistory));
 }
 
 // 莊家抽牌
@@ -552,6 +552,7 @@ function hit(){
             if(isBust("split1")){
                 writeLog("BUST! Player Lost");
                 split_round = 2;
+                playerPoint = splitBet;
             }
         }
         else{
@@ -577,6 +578,7 @@ function stand(){
     window.clearInterval(timer);
     if(is_split){
         if(split_round == 1){
+            playerPoint = splitBet;
             split_round = 2;
         }
         else if(split_round == 2){
@@ -654,19 +656,26 @@ function showLog(){
             <th>Time</th> \
         </tr>';
 
+    if(localStorage.getItem("gameHistory")){
+        gameHistory = JSON.parse(localStorage.getItem("gameHistory"));
+    }
+    else {
+        gameHistory = [];
+    }
+
     let tmpLog;
     if(sortBy == "chip"){ // sort by chip
-        tmpLog = historyGameLog.sort(function(a, b){
+        tmpLog = gameHistory.sort(function(a, b){
                 return parseInt(a['chip']) -  parseInt(b['chip']);
         });
     }
     else if(sortBy == "time"){ // sort by time
-        tmpLog = historyGameLog.sort(function(a, b){
+        tmpLog = gameHistory.sort(function(a, b){
             return parseInt(a['time']) -  parseInt(b['time']);
         });
     }
     else {
-        tmpLog = historyGameLog.sort(function(a, b){
+        tmpLog = gameHistory.sort(function(a, b){
             return parseInt(a['gameID']) -  parseInt(b['gameID']);
         });
     }
@@ -681,6 +690,7 @@ function showLog(){
             <td>${tmpLog[i]['time']}</td> \
         </tr>`;
     }
+
     $("#history").html(historyTable);
 }
 
@@ -810,14 +820,14 @@ function readGameHistory(){
     }
 
     if(localStorage.getItem("gameHistory")){
-        historyGameLog = JSON.parse(localStorage.getItem("gameHistory"));
+        gameHistory = JSON.parse(localStorage.getItem("gameHistory"));
     }
 }
 
 function start(){
     // logCount = 0; // 每次game都歸零
     currentGameLog = {}; // object
-    historyGameLog = []; // array
+    gameHistory = []; // array
     readGameHistory();
 
     // playerMoney = 1000;
@@ -978,6 +988,10 @@ $(document).ready(function(){
             $("#pause img").attr("src", "./img/pause.png");
         }
         $("#gameLog").hide();
+    });
+
+    $("#clearHistory").click(function(){
+        localStorage.clear();
     });
 
     $("#sortByGameID").click(function(){
