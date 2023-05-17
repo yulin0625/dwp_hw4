@@ -4,9 +4,8 @@ var playerMoney;
 
 var playerPoint;
 var dealerPoint;
-var split1Point;
-var split2Point;
 
+var dealFinish;
 var player_has_A;
 var player_A_is_11;
 var dealer_has_A;
@@ -140,6 +139,8 @@ function deal_first(){
     $("#resetBet").hide();
     // 顯示卡片及點數
     $("#cardArea").show();
+    $("#dealerCards").show();
+    $("#playerCards").show();
     $("#playerPoint").show();
 
     // action button
@@ -163,6 +164,7 @@ function deal_first(){
     }
     setTime(10);
     timer = window.setInterval(autoStand, 1000);
+    dealFinish = true;
 }
 
 // 抽牌 person:"dealer", "player"; hide: true, false
@@ -171,56 +173,39 @@ function drawCard(person, hide){
     let cardValue;
     let get_A = false;
 
-    // cheat
-    if(person == "dealer" &&  dealerCheat && playerPoint > 0){
-        // let maxValue = 21 - dealerPoint; // 最多只能抽到max點
-        // let minValue = playerPoint - dealerPoint + 1; // 最少要抽到min點
-        // if(dealerPoint <= playerPoint){ // min > 0
-        //     [cardNumber, cardValue] = findCheatCard(maxValue, minValue);
-        // }
-        // else{
-        //     [cardNumber, cardValue] = findCheatCard(maxValue);
-        // }
 
-        // if(cardValue == 1 || cardValue == 1){
-        //     writeLog(`莊家抽到A`);
-        // }
-        // else{
-        //     writeLog(`莊家抽到${cardValue}點`);
-        // }
+    cardNumber = getCardNumber();
+    cardValue = getCardValue(cardNumber);
+
+    if(cardValue == 1){ // 玩家抽到A
+        get_A = true;
     }
-    else{
-        cardNumber = getCardNumber();
-        cardValue = getCardValue(cardNumber);
-    
-        if(cardValue == 1){ // 玩家抽到A
-            get_A = true;
-        }
-    
-        if(person == "dealer"){
-            if(get_A){
-                dealer_has_A = true;
-                if(dealerPoint + 11 <= 21){ // A當11
-                    dealerPoint += 11;
-                    dealer_A_is_11 = true;
-                }
-                else{
-                    dealerPoint += 1;
-                }
-                writeLog("莊家抽到A");
+
+    if(person == "dealer"){
+        if(get_A){
+            dealer_has_A = true;
+            if(dealerPoint + 11 <= 21){ // A當11
+                dealerPoint += 11;
+                dealer_A_is_11 = true;
             }
-            else{ // 這次不是抽到A
-                dealerPoint += cardValue;
-                if(dealer_has_A){  // 牌堆有A
-                    if(dealer_A_is_11 && dealerPoint > 21){
-                        dealerPoint -= 10; // A當1
-                        dealer_A_is_11 = false;
-                    }
-                }
-                writeLog(`莊家抽到${cardValue}點`);
+            else{
+                dealerPoint += 1;
             }
+            writeLog("莊家抽到A");
         }
-        else{ // player, split1, split2
+        else{ // 這次不是抽到A
+            dealerPoint += cardValue;
+            if(dealer_has_A){  // 牌堆有A
+                if(dealer_A_is_11 && dealerPoint > 21){
+                    dealerPoint -= 10; // A當1
+                    dealer_A_is_11 = false;
+                }
+            }
+            writeLog(`莊家抽到${cardValue}點`);
+        }
+    }
+    else{ // player, split1, split2
+        if(!dealerCheat || !dealFinish || playerPoint < 11){ // 沒有cheat或還在第一輪發牌
             if(get_A){
                 player_has_A = true;
                 if(playerPoint + 11 <= 21){ // A當11
@@ -243,8 +228,45 @@ function drawCard(person, hide){
                 writeLog(`玩家抽到${cardValue}點`);
             }
         }
+        else{ // dealer cheat，讓player抽牌必>21
+            playerPoint += cardValue;
+            if(player_has_A){  // 牌堆有A
+                if(player_A_is_11 && playerPoint > 21){
+                    playerPoint -= 10; // A當1
+                    player_A_is_11 = false;
+                }
+            }
+            while(playerPoint < 21){ // 重抽牌直到 > 21
+                playerPoint -= cardValue;
+                returnCardtoDeck(cardNumber); // 將原本的牌放回
+    
+                cardNumber = getCardNumber(); // 重新抽牌
+                cardValue = getCardValue(cardNumber);
+    
+                if(get_A){
+                    player_has_A = true;
+                    if(playerPoint + 11 <= 21){ // A當11
+                        playerPoint += 11;
+                        player_A_is_11 = true;
+                    }
+                    else{
+                        playerPoint += 1;
+                    }
+                // writeLog("玩家抽到A");
+                }
+                else{
+                    playerPoint += cardValue;
+                    if(player_has_A){  // 牌堆有A
+                        if(player_A_is_11 && playerPoint > 21){
+                            playerPoint -= 10; // A當1
+                            player_A_is_11 = false;
+                        }
+                    }
+                }
+            }
+            writeLog(`玩家抽到${cardValue}點`);
+        }
     }
-
 
     if(hide){
         displayCard(person, "cover");
@@ -254,7 +276,6 @@ function drawCard(person, hide){
     }
     renewPoint();
     return [cardNumber, cardValue];
-
 }
 
 // 取得一個random的CardNumber(使用4副牌)
@@ -264,6 +285,10 @@ function getCardNumber(){
         cardnumber = Math.floor(Math.random()*52) + 1;
     deck[cardnumber] += 1;
     return cardnumber;
+}
+
+function returnCardtoDeck(cardnumber){
+    deck[cardnumber] -= 1;
 }
 
 // 計算卡片的點數
@@ -319,6 +344,7 @@ function split(){
     splitBet = playerBet;
     playerBet *=2;
     is_split = true;
+    split_round = 1;
     playerMoney -= splitBet;
     showBetAndBank();
     $("#split").hide();
@@ -420,10 +446,10 @@ function isBust(person){
     else if(person == "player")
         point = playerPoint;
     else if(person == "split1"){
-        point = split1Point;
+        point = playerPoint;
     }
     else if(person == "split2"){
-        point = split2Point;
+        point = playerPoint;
     }
     if(point > 21){
         return true;
@@ -438,7 +464,6 @@ function checkPoint() {
         if(split_round == 1){
             if(isBust("dealer")){
                 playerMoney += 2 * splitBet;
-                
                 writeLog("Dealer BUST! Player Win");
             }
             else if(split1Point > dealerPoint){
@@ -520,7 +545,7 @@ function hit(){
     timer = window.setInterval(autoStand, 1000);
 
     writeLog("Hit");
-    $("#double").hide();
+    $("#double").css("visibility", "hidden");
     if(is_split){
         if(split_round == 1){
             drawCard("split1");
@@ -602,17 +627,6 @@ function writeLog(msg){
     logCount += 1;
     currentGameLog[logCount.toString()] = msg;
     sessionStorage.setItem("currentGameLog", JSON.stringify(currentGameLog));
-    // localStorage.setItem("logCount", logCount.toString());
-    // document.querySelector("#log > table").innerHTML += 
-    // `<tr>
-    //     <td>${logCount}</td>
-    //     <td>${msg}</td>
-    //     <td>${dealerPoint}</td>
-    //     <td>${playerPoint}</td>
-    //     <td>${playerMoney}</td>
-    //     <td>${dealerCheat}</td>
-    // </tr>`;
-    // ++logCount;
 }
 
 function showLog(){
@@ -713,12 +727,13 @@ function reset(){
     split1Point = 0;
     split2Point = 0;
     
+    dealFinish = false;
     dealer_has_A = false;
     player_has_A = false;
     dealer_A_is_11 = false;
     player_A_is_11 = false;
     gamePause = false;
-    dealerCheat = false;
+    // dealerCheat = false;
     $("cheat").text("CHEAT: OFF");
     
     // split
@@ -758,6 +773,7 @@ function reset(){
     $("#deal").show();
     $("#deal").attr("disabled", true);
     $("#split").hide();
+    $("#double").css("visibility", "visible");
     $("#double").hide();
     $("#hit").hide();
     $("#stand").hide();
